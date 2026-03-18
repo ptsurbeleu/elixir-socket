@@ -54,7 +54,7 @@ defmodule Socket.TCP do
   @spec error(term) :: String.t
   def error(code) do
     case :inet.format_error(code) do
-      'unknown POSIX error' ->
+      ~c"unknown POSIX error" ->
         nil
 
       message ->
@@ -199,6 +199,10 @@ defmodule Socket.TCP do
 
       { :error, reason } ->
         { :error, reason }
+
+      # NOTE: This is a moot clause just to fixup typing violation warning
+      _ ->
+        :ok
     end
   end
 

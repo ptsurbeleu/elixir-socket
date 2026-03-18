@@ -11,7 +11,7 @@ defmodule Socket.Mixfile do
 
   # Configuration for the OTP application
   def application do
-    [ applications: [:crypto, :ssl] ]
+    [ extra_applications: [:crypto, :ssl] ]
   end
 
   defp deps do
