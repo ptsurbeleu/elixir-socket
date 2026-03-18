@@ -31,7 +31,7 @@ defmodule Socket.Web do
 
   """
 
-  use    Bitwise
+  import Bitwise
   import Kernel, except: [length: 1, send: 2]
   alias __MODULE__, as: W
 
@@ -166,9 +166,6 @@ defmodule Socket.Web do
 
       e in [Socket.Error] ->
         { :error, e.message }
-
-      e in [Socket.TCP.Error, Socket.SSL.Error] ->
-        { :error, e.code }
     end
   end
 
@@ -396,7 +393,7 @@ defmodule Socket.Web do
         { :error, e.message }
 
       e in [Socket.Error] ->
-        { :error, e.code }
+        { :error, e.message }
     end
   end
 
@@ -550,25 +547,25 @@ defmodule Socket.Web do
   # more data, this means we can optimize and do it 4 bytes at a time and then
   # fallback to the smaller sizes
   defp unmask(key, << data :: 32, rest :: binary >>, acc) do
-    unmask(key, rest, << acc :: binary, data ^^^ key :: 32 >>)
+    unmask(key, rest, << acc :: binary, bxor(data, key) :: 32 >>)
   end
 
   defp unmask(key, << data :: 24 >>, acc) do
     << key :: 24, _ :: 8 >> = << key :: 32 >>
 
-    unmask(key, <<>>, << acc :: binary, data ^^^ key :: 24 >>)
+    unmask(key, <<>>, << acc :: binary, bxor(data, key) :: 24 >>)
   end
 
   defp unmask(key, << data :: 16 >>, acc) do
     << key :: 16, _ :: 16 >> = << key :: 32 >>
 
-    unmask(key, <<>>, << acc :: binary, data ^^^ key :: 16 >>)
+    unmask(key, <<>>, << acc :: binary, bxor(data, key) :: 16 >>)
   end
 
   defp unmask(key, << data :: 8 >>, acc) do
     << key :: 8, _ :: 24 >> = << key :: 32 >>
 
-    unmask(key, <<>>, << acc :: binary, data ^^^ key :: 8 >>)
+    unmask(key, <<>>, << acc :: binary, bxor(data, key) :: 8 >>)
   end
 
   defp unmask(_, <<>>, acc) do
